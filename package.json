@@ -1,0 +1,37 @@
+{
+  "name": "express-mesto-gha",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Проект Mesto - разработка бэкенда",
+  "main": "app.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blaydasik/express-mesto-gha.git"
+  },
+  "keywords": [
+    "express",
+    "mongo"
+  ],
+  "author": "Aleksei Kurov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/blaydasik/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/blaydasik/express-mesto-gha",
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
+    "mongoose": "^6.7.1"
+  }
+}
