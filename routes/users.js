@@ -1,4 +1,3 @@
-/* eslint-disable linebreak-style */
 import { Router } from 'express';
 
 // импортируем обработчики запросов для роутов

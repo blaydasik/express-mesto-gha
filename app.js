@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import { constants } from 'http2';
 // импортируем роутеры
 import usersRouter from './routes/users.js';
+import cardsRouter from './routes/cards.js';
 
 // установим порт для запуска сервера
 const { PORT = 3000 } = process.env;
@@ -27,13 +28,14 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
 // мидлвэр, чтобы захардкорить id пользователя
 app.use((req, res, next) => {
   req.user = {
-    _id: '636864bf02c80c594adda369',
+    _id: '63690a244baa787d63252bb2',
   };
   next();
 });
 
 // настроим роуты
 app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
 // для любых других роутов
 app.all('*', (req, res) => {
   // 404 - был запрошен несушествующий роут
