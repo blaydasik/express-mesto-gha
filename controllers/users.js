@@ -15,15 +15,15 @@ export function getUsers(req, res) {
 export function getUserById(req, res) {
   User.findById(req.params.userId)
     .then((user) => {
-      //проверим, есть ли user в БД
-      if(user) {
+      // проверим, есть ли user в БД
+      if (user) {
         res.send(user);
       } else {
         // если пользователь не нашелся в БД, то ушипка 404
         res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: `Пользователь по указанному _id=${req.params.userId} не найден.` });
-      }      
+      }
     })
-    .catch((err) => {      
+    .catch((err) => {
       // если передан некорректный _id - ушипка 400
       if (err.name === 'CastError') {
         res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некрректные данные: _id=${req.params.userId} при запросе информации о пользователе.` });
