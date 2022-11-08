@@ -1,5 +1,7 @@
 {
-    "extends": "airbnb-base",
+    "extends": [
+      "airbnb-base"
+    ],
     "rules": {
       // разрешим вывод в консоль
       "no-console": ["error", { "allow": ["log"] }],
