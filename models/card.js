@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 import mongoose from 'mongoose';
 
 const cardSchema = new mongoose.Schema(
@@ -5,14 +6,14 @@ const cardSchema = new mongoose.Schema(
   // имя карточки
     name: {
       type: String,
-      minlength: 2,
-      maxlength: 30,
-      required: true,
+      minlength: [2, 'поле имя [{VALUE}] содержит менее 2 символов'],
+      maxlength: [30, 'поле имя [{VALUE}] содержит более 30 символов'],
+      required: [true, 'поле имя не заполнено'],
     },
     // ссылка на картинку
     link: {
       type: String,
-      required: true,
+      required: [true, 'поле ссылки на картинку не заполнено'],
     },
     // ссылка на модель автора карточки
     owner: {

@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 // импортируем константы ошибок
 import { constants } from 'http2';
 // импортируем схему карточки
@@ -42,7 +43,7 @@ export function createCard(req, res) {
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         // ушипка 400
-        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные при создании карточки: ${Object.values(err.errors)[0].message}` });
       } else {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });

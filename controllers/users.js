@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 // импортируем константы ошибок
 import { constants } from 'http2';
 // импортируем схему пользователя
@@ -42,7 +43,7 @@ export function createUser(req, res) {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         // ушипка 400
-        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя: ${Object.values(err.errors)[0].message}` });
       } else {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
@@ -66,7 +67,7 @@ export function updateProfile(req, res) {
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         // ушипка 400
-        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении пользователя.' });
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные при обновлении пользователя: ${Object.values(err.errors)[0].message}` });
       } else {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
