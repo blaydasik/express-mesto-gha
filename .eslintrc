@@ -1,14 +1,12 @@
 {
-    "extends": [
-      "airbnb-base"
-    ],
+    "extends": "airbnb-base",
     "rules": {
       // разрешим вывод в консоль
       "no-console": ["error", { "allow": ["log"] }],
       // разрешим нижнее подчеркивание в _id
       "no-underscore-dangle": ["error", { "allow": ["_id"] }],
       // разрешим импорт unresolved modules in CommonJS
-      "import/no-unresolved": ["error", { "commonjs": true }],
+      "import/no-unresolved": ["error", { "commonjs": "true" }],
       // разрешим указание расширения js при импорте
       "import/extensions": ["error", { "js": "always" }]
     }
