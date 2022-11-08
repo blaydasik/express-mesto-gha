@@ -6,27 +6,27 @@ import Card from '../models/card.js';
 // обработчик запроса всех карточек
 export function getCards(req, res) {
   Card.find({})
-    .then((users) => res.send(users))
+    .then((cards) => res.send(cards))
     // 500 - ушипка по умолчанию
     .catch(() => res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' }));
 }
 
-// обработчик запроса пользователя по id
+// обработчик запроса удаления карточки по id
 export function deleteCardById(req, res) {
-  Card.findById(req.params.userId)
-    .then((user) => {
-      // проверим, есть ли user в БД
-      if (user) {
-        res.send(user);
+  Card.findByIdAndRemove(req.params.cardId)
+    .then((card) => {
+      // проверим, есть ли карточка в БД
+      if (card) {
+        res.send(card);
       } else {
-        // если пользователь не нашелся в БД, то ушипка 404
-        res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: `Пользователь по указанному _id=${req.params.userId} не найден.` });
+        // если карточка не нашлась в БД, то ушипка 404
+        res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с указанным _id=${req.params.cardId} не найдена.` });
       }
     })
     .catch((err) => {
       // если передан некорректный _id - ушипка 400
       if (err.name === 'CastError') {
-        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некрректные данные: _id=${req.params.userId} при запросе информации о пользователе.` });
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные: _id=${req.params.cardId} для удаления карточки.` });
       } else {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
@@ -34,15 +34,69 @@ export function deleteCardById(req, res) {
     });
 }
 
-// обработчик запроса создания пользователя
+// обработчик запроса создания карточки
 export function createCard(req, res) {
-  const { name, about, avatar } = req.body;
-  Card.create({ name, about, avatar })
-    .then((user) => res.send(user))
+  const { name, link } = req.body;
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         // ушипка 400
-        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
+      } else {
+        // 500 - ушипка по умолчанию
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
+      }
+    });
+}
+
+// обработчик запроса постановки лайка
+export function likeCard(req, res) {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true, runValidators: true },
+  )
+    .then((card) => {
+      // проверим, есть ли карточка в БД
+      if (card) {
+        res.send(card);
+      } else {
+        // если карточка не нашлась в БД, то ушипка 404
+        res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: `Передан несуществующий _id=${req.params.cardId} карточки.` });
+      }
+    })
+    .catch((err) => {
+      // если передан некорректный _id - ушипка 400
+      if (err.name === 'CastError') {
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные: _id=${req.params.cardId} для постановки лайка.` });
+      } else {
+        // 500 - ушипка по умолчанию
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
+      }
+    });
+}
+
+// обработчик запроса снятия лайка
+export function dislikeCard(req, res) {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true, runValidators: true },
+  )
+    .then((card) => {
+      // проверим, есть ли карточка в БД
+      if (card) {
+        res.send(card);
+      } else {
+        // если карточка не нашлась в БД, то ушипка 404
+        res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: `Передан несуществующий _id=${req.params.cardId} карточки.` });
+      }
+    })
+    .catch((err) => {
+      // если передан некорректный _id - ушипка 400
+      if (err.name === 'CastError') {
+        res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные: _id=${req.params.cardId} для снятия лайка.` });
       } else {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });

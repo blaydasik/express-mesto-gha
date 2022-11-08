@@ -13,6 +13,11 @@ import cardsRouter from './routes/cards.js';
 // установим порт для запуска сервера
 const { PORT = 3000 } = process.env;
 
+process.on('unhandledRejection', (err) => {
+  console.log(`Unexpected error: ${err}`);
+  process.exit(1);
+});
+
 const app = express();
 // задействуем нужные методы для парсера данных
 app.use(bodyParser.json());
@@ -20,7 +25,7 @@ app.use(bodyParser.json());
 // включим валидацию для обновления документов
 mongoose.set({ runValidators: true });
 // подключимся к серверу MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
+mongoose.connect('mongodb://localhost:27017/mestodb')
   .catch((err) => {
     console.log(`Connection to DB mestodb has failed with error: ${err}`);
   });
@@ -28,7 +33,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
 // мидлвэр, чтобы захардкорить id пользователя
 app.use((req, res, next) => {
   req.user = {
-    _id: '63690a244baa787d63252bb2',
+    _id: '636864bf02c80c594adda369',
   };
   next();
 });
