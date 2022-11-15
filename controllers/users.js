@@ -1,8 +1,12 @@
-/* eslint-disable linebreak-style */
+// импортируем модуль для хэширования
+import bcrypt from 'bcryptjs';
 // импортируем константы ошибок
 import { constants } from 'http2';
 // импортируем схему пользователя
 import User from '../models/user.js';
+
+// длина модификатора входа хэш-функции
+const saltLength = 10;
 
 // обработчик запроса всех пользователей
 export function getUsers(req, res) {
@@ -37,13 +41,26 @@ export function getUserById(req, res) {
 
 // обработчик запроса создания пользователя
 export function createUser(req, res) {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  // хэшируем пароль
+  bcrypt.hash(password, saltLength)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash, // записываем хэш вместо пароля в БД
+    }))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         // ушипка 400
         res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя: ${Object.values(err.errors)[0].message}` });
+      } else if (err.code === 11000) {
+        // указан уже существующий email - ушипка 409
+        res.status(constants.HTTP_STATUS_CONFLICT).send({ message: 'Нарушено условие на уникальность поля email' });
       } else {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
