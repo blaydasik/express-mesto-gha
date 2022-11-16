@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 // импортируем модуль для хэширования
 import bcrypt from 'bcryptjs';
 // импортируем пакет для создания JWT токена
@@ -9,6 +10,11 @@ import User from '../models/user.js';
 
 // длина модификатора входа хэш-функции
 const saltLength = 10;
+
+// добавим env-переменные из файла в process.env
+dotenv.config();
+// установим порт для запуска сервера, получим секретный ключ
+const { JWT_SECRET } = process.env;
 
 // обработчик запроса всех пользователей
 export function getUsers(req, res) {
@@ -128,11 +134,20 @@ export function login(req, res) {
         // пэйлоуд токена
         { _id: user._id },
         // секретный ключ подписи
-        'some-secret-key',
+        JWT_SECRET,
         // объект опций - срок действия токена
-        { expiresIn: '7d' } );
-      // отправим токен клиенту
-      res.send({ token });
+        { expiresIn: '7d' },
+      );
+      // отправим токен клиенту, браузер сохранит его в куках
+      res.cookie('jwt', token, {
+        // срок хранения куки
+        maxAge: 3600000 * 24 * 7,
+        // защитим токен
+        httpOnly: true,
+        // защита от автоматической отправки кук
+        sameSite: true,
+      })
+        .end(); // у ответа нет тела, используем метод end
     })
     .catch((err) => {
       // 401 - ушипка авторизации

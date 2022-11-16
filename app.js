@@ -1,6 +1,6 @@
-/* eslint-disable linebreak-style */
 import express from 'express';
 import process from 'process';
+
 // подключаем ODM
 import mongoose from 'mongoose';
 // импортируем парсер данных
@@ -11,9 +11,9 @@ import { constants } from 'http2';
 import usersRouter from './routes/users.js';
 import cardsRouter from './routes/cards.js';
 // импортируем обработчики запросов для роутов
-import { login } from './controllers/users.js';
+import { login, createUser } from './controllers/users.js';
 
-// установим порт для запуска сервера
+// установим порт для запуска сервера, получим секретный ключ
 const { PORT = 3000 } = process.env;
 
 process.on('unhandledRejection', (err) => {
@@ -43,6 +43,7 @@ app.use((req, res, next) => {
 
 // настроим роуты
 app.post('/signin', login);
+app.post('/signup', createUser);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 // для любых других роутов
