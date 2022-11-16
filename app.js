@@ -10,6 +10,8 @@ import { constants } from 'http2';
 // импортируем роутеры
 import usersRouter from './routes/users.js';
 import cardsRouter from './routes/cards.js';
+// импортируем обработчики запросов для роутов
+import { login } from './controllers/users.js';
 
 // установим порт для запуска сервера
 const { PORT = 3000 } = process.env;
@@ -40,6 +42,7 @@ app.use((req, res, next) => {
 });
 
 // настроим роуты
+app.post('/signin', login);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 // для любых других роутов

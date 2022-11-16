@@ -1,5 +1,7 @@
 // импортируем модуль для хэширования
 import bcrypt from 'bcryptjs';
+// импортируем пакет для создания JWT токена
+import jwt from 'jsonwebtoken';
 // импортируем константы ошибок
 import { constants } from 'http2';
 // импортируем схему пользователя
@@ -113,5 +115,27 @@ export function updateAvatar(req, res) {
         // 500 - ушипка по умолчанию
         res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
       }
+    });
+}
+
+// обработчик залогинивания
+export function login(req, res) {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // создадим токен
+      const token = jwt.sign(
+        // пэйлоуд токена
+        { _id: user._id },
+        // секретный ключ подписи
+        'some-secret-key',
+        // объект опций - срок действия токена
+        { expiresIn: '7d' } );
+      // отправим токен клиенту
+      res.send({ token });
+    })
+    .catch((err) => {
+      // 401 - ушипка авторизации
+      res.status(constants.HTTP_STATUS_UNAUTHORIZED).send({ message: err.message });
     });
 }
