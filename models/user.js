@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'поле пароль не заполнено.'],
+      select: false,
     },
   },
   // уберем лишний для нас ключ с версией документа
@@ -46,7 +47,7 @@ const userSchema = new mongoose.Schema(
 
 // метод схемы для поиска пользователя по логину и паролю
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email })
+  return this.findOne({ email }).select('+password')
     .then((user) => {
       // проверим, найден ли пользователь
       if (user) {
@@ -55,7 +56,9 @@ userSchema.statics.findUserByCredentials = function (email, password) {
           .then((checked) => {
             // если пароль корректный
             if (checked) {
-              return user;
+              const userWithoutPassword = user.toObject();
+              delete userWithoutPassword.password;
+              return userWithoutPassword;
             } // если хэши не совпали отклоняем промис с ошибкой
             return Promise.reject(new Error('Указаны некорректные почта или пароль :-('));
           });

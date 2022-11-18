@@ -13,8 +13,8 @@ const saltLength = 10;
 
 // добавим env-переменные из файла в process.env
 dotenv.config();
-// установим порт для запуска сервера, получим секретный ключ
-const { JWT_SECRET } = process.env;
+// получим секретный ключ
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // обработчик запроса всех пользователей
 export function getUsers(req, res) {
@@ -26,7 +26,7 @@ export function getUsers(req, res) {
 
 // обработчик запроса пользователя по id
 export function getUserById(req, res) {
-  User.findById(req.params.userId)
+  User.findById(req.params.userId === 'me' ? req.user._id : req.params.userId)
     .then((user) => {
       // проверим, есть ли user в БД
       if (user) {
@@ -64,7 +64,7 @@ export function createUser(req, res) {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        // ушипка 400
+        // ушипка 400 - данные для создания пользователя не прошли валидацию
         res.status(constants.HTTP_STATUS_BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя: ${Object.values(err.errors)[0].message}` });
       } else if (err.code === 11000) {
         // указан уже существующий email - ушипка 409
@@ -134,7 +134,7 @@ export function login(req, res) {
         // пэйлоуд токена
         { _id: user._id },
         // секретный ключ подписи
-        JWT_SECRET,
+        NODE_ENV === 'production' ? JWT_SECRET : 'super_duper_crypto_strong_key',
         // объект опций - срок действия токена
         { expiresIn: '7d' },
       );

@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 // импортируем обработчики запросов для роутов
 import {
-  getUsers, getUserById, updateProfile, updateAvatar,
+  getUsers, getUserById, updateProfile, updateAvatar
 } from '../controllers/users.js';
 
 // настроим маршруты для users

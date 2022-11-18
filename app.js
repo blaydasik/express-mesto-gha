@@ -3,8 +3,9 @@ import process from 'process';
 
 // подключаем ODM
 import mongoose from 'mongoose';
-// импортируем парсер данных
+// импортируем парсеры данных
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 // импортируем константы ошибок
 import { constants } from 'http2';
 // импортируем роутеры
@@ -12,6 +13,8 @@ import usersRouter from './routes/users.js';
 import cardsRouter from './routes/cards.js';
 // импортируем обработчики запросов для роутов
 import { login, createUser } from './controllers/users.js';
+// импортируем мидлвару авторизации
+import auth from './middlewares/auth.js';
 
 // установим порт для запуска сервера, получим секретный ключ
 const { PORT = 3000 } = process.env;
@@ -22,8 +25,9 @@ process.on('unhandledRejection', (err) => {
 });
 
 const app = express();
-// задействуем нужные методы для парсера данных
+// задействуем нужные методы для парсеров данных
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // включим валидацию для обновления документов
 mongoose.set({ runValidators: true });
@@ -33,17 +37,12 @@ mongoose.connect('mongodb://localhost:27017/mestodb')
     console.log(`Connection to DB mestodb has failed with error: ${err}`);
   });
 
-// мидлвэр, чтобы захардкорить id пользователя
-app.use((req, res, next) => {
-  req.user = {
-    _id: '636864bf02c80c594adda369',
-  };
-  next();
-});
-
 // настроим роуты
 app.post('/signin', login);
 app.post('/signup', createUser);
+
+// защитим все остальные роуты авторизацией
+app.use(auth);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 // для любых других роутов
