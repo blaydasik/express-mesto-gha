@@ -32,7 +32,7 @@ app.use(cookieParser());
 // включим валидацию для обновления документов
 mongoose.set({ runValidators: true });
 // подключимся к серверу MongoDB
-mongoose.connect('mongodb://localhost:27017/mestodb')
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
   .catch((err) => {
     console.log(`Connection to DB mestodb has failed with error: ${err}`);
   });

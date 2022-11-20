@@ -14,11 +14,18 @@ export function getCards(req, res) {
 
 // обработчик запроса удаления карточки по id
 export function deleteCardById(req, res) {
+  Card.checkCardOwner(req.params.cardId, req.user._id)
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       // проверим, есть ли карточка в БД
       if (card) {
-        res.send(card);
+        // проверим является ли текущий пользователь владельцем карточки
+        if (req.user._id === card.owner) {
+          res.send(card);
+        } else {
+          // попытка удалить чужую карточку - ушипка 403
+          res.status(constants.HTTP_STATUS_FORBIDDEN).send({ message: 'Зафиксирована попытка удаления чужой карточки :-(.' });
+        }
       } else {
         // если карточка не нашлась в БД, то ушипка 404
         res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: `Карточка с указанным _id=${req.params.cardId} не найдена.` });
