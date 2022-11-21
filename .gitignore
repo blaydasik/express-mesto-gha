@@ -9,10 +9,10 @@ node_modules
 # Optional npm cache directory
 .npm
 
-# Secret key file
-.env
-
 # Optional REPL history
 .DS_Store
 .idea
 .vscode
+
+# Secret key file
+.env
