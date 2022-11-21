@@ -1,6 +1,4 @@
 // импортируем классы ошибок
-import HTTPError from '../errors/HTTPError.js';
-import InternalServerError from '../errors/InternalServerError.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import ForbiddenError from '../errors/ForbiddenError.js';
 import BadRequestError from '../errors/BadRequestError.js';
@@ -12,7 +10,7 @@ export function getCards(req, res, next) {
   Card.find({})
     .then((cards) => res.send(cards))
     // 500 - ушипка по умолчанию
-    .catch((err) => next(new InternalServerError(err.message)));
+    .catch((err) => next(err));
 }
 
 // обработчик запроса удаления карточки по id
@@ -31,18 +29,16 @@ export function deleteCardById(req, res, next) {
         Card.findByIdAndRemove(req.params.cardId)
           .then((result) => {
             res.send(result);
-          });
+          })
+          .catch(next);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         // ушипка 400
         next(new BadRequestError('Переданы некорректные данные для удаления карточки :-('));
-      } else if (err instanceof HTTPError) {
-        next(err);
       } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        next(err);
       }
     });
 }
@@ -58,7 +54,7 @@ export function createCard(req, res, next) {
         next(new BadRequestError(`Переданы некорректные данные при создании карточки: ${Object.values(err.errors)[0].message}`));
       } else {
         // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        next(err);
       }
     });
 }
@@ -83,11 +79,9 @@ export function likeCard(req, res, next) {
       // если передан некорректный _id - ушипка 400
       if (err.name === 'CastError') {
         next(new BadRequestError(`Переданы некорректные данные: _id=${req.params.cardId} для постановки лайка.`));
-      } if (err instanceof HTTPError) {
-        next(err);
       } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        // 500 - ушипка по умолчанию + HTTP errors
+        next(err);
       }
     });
 }
@@ -112,11 +106,9 @@ export function dislikeCard(req, res, next) {
       // если передан некорректный _id - ушипка 400
       if (err.name === 'CastError') {
         next(new BadRequestError(`Переданы некорректные данные: _id=${req.params.cardId} для постановки лайка.`));
-      } if (err instanceof HTTPError) {
-        next(err);
       } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        // 500 - ушипка по умолчанию + HTTP errors
+        next(err);
       }
     });
 }

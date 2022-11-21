@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 // импортируем обработчики запросов для роутов
 import {
-  getUsers, getUserById, updateProfile, updateAvatar,
+  getUsers, getUserById, getCurrenUser, updateProfile, updateAvatar,
 } from '../controllers/users.js';
 
 // импортируем валидаторы celebrate
@@ -15,6 +15,9 @@ const usersRouter = Router();
 
 // получим всех пользоватлей
 usersRouter.get('/', getUsers);
+
+// получим информацию о текущем пользователе
+usersRouter.get('/me', getCurrenUser);
 
 // получим пользователя по его id
 usersRouter.get('/:userId', celebrategetUserById, getUserById);

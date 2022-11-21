@@ -4,8 +4,6 @@ import bcrypt from 'bcryptjs';
 // импортируем пакет для создания JWT токена
 import jwt from 'jsonwebtoken';
 // импортируем классы ошибок
-import HTTPError from '../errors/HTTPError.js';
-import InternalServerError from '../errors/InternalServerError.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import UnathorizedError from '../errors/UnathorizedError.js';
 import BadRequestError from '../errors/BadRequestError.js';
@@ -26,32 +24,40 @@ export function getUsers(req, res, next) {
   User.find({})
     .then((users) => res.send(users))
     // 500 - ушипка по умолчанию
-    .catch((err) => next(new InternalServerError(err.message)));
+    .catch((err) => next(err));
+}
+
+// поиск и отправка данных пользователя по id
+function findUserById(id, res, next) {
+  User.findById(id)
+    .then((user) => {
+    // проверим, есть ли user в БД
+      if (user) {
+        res.send(user);
+      } else {
+      // если пользователь не нашелся в БД, то ушипка 404
+        throw new NotFoundError(`Пользователь с указанным _id=${id} не найден.`);
+      }
+    })
+    .catch((err) => {
+    // если передан некорректный _id - ушипка 400
+      if (err.name === 'CastError') {
+        next(new BadRequestError(`Переданы некорректные данные: _id=${id} при запросе информации о пользователе.`));
+      } else {
+      // 500 - ушипка по умолчанию + HTTP errors
+        next(err);
+      }
+    });
 }
 
 // обработчик запроса пользователя по id
 export function getUserById(req, res, next) {
-  User.findById(req.params.userId === 'me' ? req.user._id : req.params.userId)
-    .then((user) => {
-      // проверим, есть ли user в БД
-      if (user) {
-        res.send(user);
-      } else {
-        // если пользователь не нашелся в БД, то ушипка 404
-        throw new NotFoundError(`Пользователь с указанным _id=${req.params.userId} не найден.`);
-      }
-    })
-    .catch((err) => {
-      // если передан некорректный _id - ушипка 400
-      if (err.name === 'CastError') {
-        next(new BadRequestError(`Переданы некорректные данные: _id=${req.params.userId} при запросе информации о пользователе.`));
-      } else if (err instanceof HTTPError) {
-        next(err);
-      } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
-      }
-    });
+  findUserById(req.params.userId, res, next);
+}
+
+// обработчик запроса данных текущего пользователя
+export function getCurrenUser(req, res, next) {
+  findUserById(req.user._id, res, next);
 }
 
 // обработчик запроса создания пользователя
@@ -80,11 +86,9 @@ export function createUser(req, res, next) {
       } else if (err.code === 11000) {
         // указан уже существующий email - ушипка 409
         next(new ConflictError('Нарушено условие на уникальность поля email :-('));
-      } else if (err instanceof HTTPError) {
-        next(err);
       } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        // 500 - ушипка по умолчанию + HTTP errors
+        next(err);
       }
     });
 }
@@ -106,11 +110,9 @@ export function updateProfile(req, res, next) {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         // ушипка 400
         next(new BadRequestError(`Переданы некорректные данные при обновлении пользователя: ${Object.values(err.errors)[0].message}`));
-      } else if (err instanceof HTTPError) {
-        next(err);
       } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        // 500 - ушипка по умолчанию + HTTP errors
+        next(err);
       }
     });
 }
@@ -129,14 +131,12 @@ export function updateAvatar(req, res, next) {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         // ушипка 400
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара :-('));
-      } else if (err instanceof HTTPError) {
-        next(err);
       } else {
-        // 500 - ушипка по умолчанию
-        next(new InternalServerError(err.message));
+        // 500 - ушипка по умолчанию + HTTP errors
+        next(err);
       }
     });
 }

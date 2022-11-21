@@ -7,14 +7,12 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 // мидлвэр для авторизации
 function auth(req, res, next) {
-  // извлечем авторизационный заголовок
-  const { authorization } = req.headers;
   // извлечем куки
   const { cookies } = req;
   // проверим наличие должного авторизационного заголовка или куки с токеном
-  if ((authorization && authorization.startsWith('Bearer ')) || (cookies && cookies.jwt)) {
+  if (cookies && cookies.jwt) {
     // извлечем токен или из заголовка, или из куки
-    const token = authorization ? authorization.replace('Bearer ', '') : cookies.jwt;
+    const token = cookies.jwt;
     let payload;
     // верификация токена
     try {

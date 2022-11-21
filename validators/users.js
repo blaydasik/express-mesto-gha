@@ -22,11 +22,8 @@ export const celebrateCreateUser = celebrate({
 
 // валидатор полей при запросе пользователя по id
 export const celebrategetUserById = celebrate({
-  params: Joi.object({
-    userId: Joi.alternatives().try(
-      Joi.string().equal('me').required(),
-      Joi.string().hex().length(24).required(),
-    ),
+  params: Joi.object().keys({
+    userId: Joi.string().hex().length(24).required(),
   }),
 });
 
