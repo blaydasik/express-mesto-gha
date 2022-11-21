@@ -68,7 +68,11 @@ export function createUser(req, res, next) {
       email,
       password: hash, // записываем хэш вместо пароля в БД
     }))
-    .then((user) => res.send(user))
+    .then((user) => {
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.password;
+      res.send(userWithoutPassword);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         // ушипка 400 - данные для создания пользователя не прошли валидацию
@@ -159,8 +163,8 @@ export function login(req, res, next) {
         httpOnly: true,
         // защита от автоматической отправки кук
         sameSite: true,
-      })
-        .end(); // у ответа нет тела, используем метод end
+      });
+      res.send({ token });
     })
     .catch(() => {
       // 401 - ушипка авторизации
