@@ -5,23 +5,28 @@ import {
   getCards, deleteCardById, createCard, likeCard, dislikeCard,
 } from '../controllers/cards.js';
 
+// импортируем валидаторы
+import {
+  celebrateCardId, celebrateCreateCard,
+} from '../validators/cards.js';
+
 // настроим маршруты для cards
 const cardsRouter = Router();
 
 // получим все карточки
 cardsRouter.get('/', getCards);
 
-// получим пользователя по его id
-cardsRouter.delete('/:cardId', deleteCardById);
+// удалим карточку по еe id
+cardsRouter.delete('/:cardId', celebrateCardId, deleteCardById);
 
 // создадим карточку
-cardsRouter.post('/', createCard);
+cardsRouter.post('/', celebrateCreateCard, createCard);
 
 // поставим лайк карточке
-cardsRouter.put('/:cardId/likes', likeCard);
+cardsRouter.put('/:cardId/likes', celebrateCardId, likeCard);
 
 // уберем лайк с карточки
-cardsRouter.delete('/:cardId/likes', dislikeCard);
+cardsRouter.delete('/:cardId/likes', celebrateCardId, dislikeCard);
 
 // экспортируем роутер
 export default cardsRouter;

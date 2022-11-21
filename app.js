@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 // импортируем парсеры данных
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+// импортируем мидлвэр для обработки ошибок celebrate
+import { errors } from 'celebrate';
 // импортируем константы ошибок
 import { constants } from 'http2';
 // импортируем роутеры
@@ -15,6 +17,8 @@ import cardsRouter from './routes/cards.js';
 import { login, createUser } from './controllers/users.js';
 // импортируем мидлвару авторизации
 import auth from './middlewares/auth.js';
+// импортируем валидаторы celebrate
+import { celebrateLoginUser, celebrateCreateUser } from './validators/users.js';
 
 // установим порт для запуска сервера, получим секретный ключ
 const { PORT = 3000 } = process.env;
@@ -38,8 +42,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
   });
 
 // настроим роуты
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrateLoginUser, login);
+app.post('/signup', celebrateCreateUser, createUser);
 
 // защитим все остальные роуты авторизацией
 app.use(auth);
@@ -49,6 +53,21 @@ app.use('/cards', cardsRouter);
 app.all('*', (req, res) => {
   // 404 - был запрошен несушествующий роут
   res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: 'Маршрута не найдена, насяльника.' });
+});
+
+// обработчик ошибок celebrate
+app.use(errors());
+
+// мидлвэр для централизованной обработки ошибок
+app.use((err, req, res, next) => {
+  let { statusCode, message } = err;
+  if (!statusCode) {
+    statusCode = constants.HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    message = 'На сервере произошла необработанная нами ушипка.';
+  }
+  // если ошибка сгенерирована не нами
+  res.status(statusCode).send({ message });
+  next();
 });
 
 // запустим сервер на выбранном порту

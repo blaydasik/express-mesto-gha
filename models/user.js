@@ -2,6 +2,10 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 // импортируем модуль для хэширования
 import bcrypt from 'bcryptjs';
+// импортируем классы ошибок
+import UnathorizedError from '../errors/UnathorizedError.js';
+// импортируем регулярку
+import urlRegex from '../utils/constants.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,6 +27,10 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+      validate: {
+        validator: (url) => urlRegex.test(url),
+        message: 'поле ссылка на аватар `{VALUE}` не прошло валидацию.',
+      },
     },
     // email
     email: {
@@ -46,7 +54,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // метод схемы для поиска пользователя по логину и паролю
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       // проверим, найден ли пользователь
@@ -60,10 +68,10 @@ userSchema.statics.findUserByCredentials = function (email, password) {
               delete userWithoutPassword.password;
               return userWithoutPassword;
             } // если хэши не совпали отклоняем промис с ошибкой
-            return Promise.reject(new Error('Указаны некорректные почта или пароль :-('));
+            throw new UnathorizedError('Указаны некорректные почта или пароль :-(');
           });
       } // иначе отклоняем промис с ошибкой
-      return Promise.reject(new Error('Указаны некорректные почта или пароль :-('));
+      throw new UnathorizedError('Указаны некорректные почта или пароль :-(');
     });
 };
 

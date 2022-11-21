@@ -1,5 +1,6 @@
-/* eslint-disable linebreak-style */
 import mongoose from 'mongoose';
+// импортируем регулярку
+import urlRegex from '../utils/constants.js';
 
 const cardSchema = new mongoose.Schema(
   {
@@ -14,6 +15,10 @@ const cardSchema = new mongoose.Schema(
     link: {
       type: String,
       required: [true, 'поле ссылки на картинку не заполнено'],
+      validate: {
+        validator: (url) => urlRegex.test(url),
+        message: 'поле адрес картинки `{VALUE}` не прошло валидацию.',
+      },
     },
     // ссылка на модель автора карточки
     owner: {
@@ -39,23 +44,6 @@ const cardSchema = new mongoose.Schema(
   // уберем лишний для нас ключ с версией документа
   { versionKey: false },
 );
-
-// метод схемы для проверки, что текущий пользователь - владелец карточки
-cardSchema.statics.checkCardOwner = function (cardId, ownerId) {
-  return this.findOne(cardId)
-    .then((card) => {
-      // проверим, нашлась ли карточка в базе
-      if (card) {
-        // вернем результат проверки принадлежности карточки текущему пользователю
-        if(card.owner === ownerId) {
-          return true;
-        } else {
-          return Promise.reject(new Error('Зафиксирована попытка удаления чужой карточки :-('));
-        }
-      } // иначе отклоняем промис с ошибкой
-      return Promise.reject(new Error('Указанная карточка в базе не найдена :-('));
-    });
-};
 
 // создадим и экспортируем модель card
 export default mongoose.model('card', cardSchema);

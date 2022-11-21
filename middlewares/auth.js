@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-// импортируем константы ошибок
-import { constants } from 'http2';
+// импортируем классы ошибок
+import UnathorizedError from '../errors/UnathorizedError.js';
 
 // получим секретный ключ
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -21,14 +21,14 @@ function auth(req, res, next) {
       payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'super_duper_crypto_strong_key');
     } catch (err) {
       // ушипка 401 - токен не прошел верификацию
-      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).send({ message: 'Переданный токен не верифицирован' });
+      next(new UnathorizedError('Переданный токен не верифицирован :-('));
     }
     // записываем пейлоуд в объект запроса
     req.user = payload;
     next();
   } else {
     // ушипка 401 - токена нет в заголовке и куки с токеном тоже нет
-    res.status(constants.HTTP_STATUS_UNAUTHORIZED).send({ message: 'Отсутствует авторизационный заголовок или кука' });
+    next(new UnathorizedError('Отсутствует авторизационный заголовок или кука :-('));
   }
 }
 
